@@ -53,9 +53,6 @@ def users_details():
     return recipient_email, subject, body
 
 
-recipient_email, subject, body = users_details()
-
-
 # function to create email template using email module.
 # You need to create an email message object, set the headers, and attach the email body.
 # MIMEMultipart is used to create a container for the email message that can hold multiple parts.
@@ -71,7 +68,34 @@ def create_email_temp(sender_email, receiver_email, email_subject, email_body):
     return msg
 
 
-message = create_email_temp("pawan@gmail.com", recipient_email, subject, body)
-print(message)
+# function to send the email through smtp server.
 
-#
+def send_email(sender_email, sender_password, smtp_server, smtp_port, email_message):
+    try:
+        # connect with the server.
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()  # Upgrade the connection to a secure TLS connection
+        server.login(sender_email, sender_password)  # login to the server
+
+        # send the email.
+        server.sendmail(sender_email, email_message['To'], email_message.as_string())
+        # close the connection
+        server.quit()
+        print("Email send successfully!!!!")
+    except Exception as ex:
+        print(f"Failed to send the message because of {ex}")
+
+
+if __name__ == "__main__":
+    recipient_email, subject, body = users_details()
+
+    # collect senders credentials
+    sender_email = input("enter sender's email-id -:")
+    sender_password = input("enter sender's password -:")
+
+    # firstly lets configure smtp-:
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587  # 465 for ssl
+
+    email_message = create_email_temp(sender_email, recipient_email, subject, body)
+    send_email(sender_email, sender_password, smtp_server, smtp_port, email_message)
